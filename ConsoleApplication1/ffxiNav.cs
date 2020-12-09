@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using PathFinder;
 using PathFinder.Common;
+using System.Threading;
 
 namespace ConsoleApplication1
 {
@@ -57,16 +58,33 @@ namespace ConsoleApplication1
             var character = ffxiprocess._CharacterDictionary["Mistrel"];
 
             var tc = new ToonControl(Logger, ffxiprocess._CharacterDictionary, character);
-            
-            tc.Character.FFxiNAV.Load(navMeshPath);
-            var enabled = tc.Character.FFxiNAV.IsNavMeshEnabled();
 
             ffxiNav.Load(navMeshPath);
             var worked = ffxiNav.IsNavMeshEnabled();
-            if (!worked)
-                Console.WriteLine("Couldn't load mesh: " + navMeshPath);
-            else
-                Console.WriteLine("Loaded Mesh: " + navMeshPath);
+
+            tc.Character.FFxiNAV.Load(navMeshPath);
+            var enabled = tc.Character.FFxiNAV.IsNavMeshEnabled();
+            var i = 0;
+            while (!enabled)
+            {
+                enabled = tc.Character.FFxiNAV.IsNavMeshEnabled();
+                if (!enabled)
+                    Console.WriteLine("attempt: " + i + " Couldn't load mesh: " + navMeshPath);
+                else
+                    Console.WriteLine("Loaded Mesh: " + navMeshPath);
+
+                worked = ffxiNav.IsNavMeshEnabled();
+
+                if (!worked)
+                    Console.WriteLine("Couldn't load mesh: " + navMeshPath);
+                else
+                    Console.WriteLine("Loaded Mesh: " + navMeshPath);
+
+                Thread.Sleep(1000);
+                i++;
+            }
+
+            Console.WriteLine("Nav mesh must have loaded!");
         }
 
         public void Check()
